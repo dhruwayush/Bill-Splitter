@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Splitter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Splitter</h1>
+
+    <h2>Add an Expense</h2>
+    <form id="expenseForm">
+        <label for="description">Description:</label>
+        <input type="text" id="description" required><br><br>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" step="0.01" required><br><br>
+
+        <label for="payer">Payer:</label>
+        <input type="text" id="payer" required><br><br>
+
+        <label for="split">Split Equally:</label>
+        <input type="checkbox" id="split"><br><br>
+
+        <input type="submit" value="Add Expense">
+    </form>
+
+    <h2>Expenses</h2>
+    <ul id="expenseList">
+        <!-- Expense items will be listed here -->
+    </ul>
+
+    <h2>Split Results</h2>
+    <ul id="splitResults">
+        <!-- Split results will be displayed here -->
+    </ul>
+
+    <h2>Set the Number of People Involved</h2>
+    <input type="number" id="numOfPeople" min="1" value="1">
+    <button id="setNumOfPeople">Set</button>
+
+    <script>
+        const expenseForm = document.getElementById("expenseForm");
+        const expenseList = document.getElementById("expenseList");
+        const splitResults = document.getElementById("splitResults");
+        const numOfPeopleInput = document.getElementById("numOfPeople");
+        const setNumOfPeopleButton = document.getElementById("setNumOfPeople");
+
+        // Define an array to store expenses
+        const expenses = [];
+        let numOfPeople = 1;
+
+        setNumOfPeopleButton.addEventListener("click", function () {
+            numOfPeople = parseInt(numOfPeopleInput.value);
+            displaySplitResults();
+        });
+
+        expenseForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Get input values
+            const description = document.getElementById("description").value;
+            const amount = parseFloat(document.getElementById("amount").value);
+            const payer = document.getElementById("payer").value;
+            const splitEqually = document.getElementById("split").checked;
+
+            // Create an expense object
+            const expense = {
+                description,
+                amount,
+                payer,
+                splitEqually,
+            };
+
+            // Add the expense to the expenses array
+            expenses.push(expense);
+
+            // Display the expense in the list
+            const listItem = document.createElement("li");
+            listItem.textContent = `${description} - $${amount} (Paid by ${payer})`;
+            expenseList.appendChild(listItem);
+
+            // Calculate and display split results
+            displaySplitResults();
+
+            // Reset the form
+            expenseForm.reset();
+        });
+
+        function displaySplitResults() {
+            // Clear existing split results
+            splitResults.innerHTML = "";
+
+            // Calculate the total amount paid
+            const totalAmount = expenses.reduce((total, expense) => total + expense.amount, 0);
+
+            // Calculate individual shares
+            const share = totalAmount / numOfPeople;
+
+            // Calculate and display individual balances
+            expenses.forEach((expense) => {
+                const balance = expense.amount - (expense.splitEqually ? share : 0);
+
+                const listItem = document.createElement("li");
+                listItem.textContent = `${expense.payer} ${
+                    balance >= 0 ? "owes" : "is owed"
+                } $${Math.abs(balance)} ${balance >= 0 ? "to the group" : "by the group"}`;
+                splitResults.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>
